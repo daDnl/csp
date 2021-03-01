@@ -1,0 +1,69 @@
+<div class="simple-div simple-div_type_fullpage">
+  <div class="simple-div-header sign-up-steps-bar">
+    <p class="sign-up-step sign-up-step_type_selected"><span class="round-number round-number_type_selected">1</span> Создание аккаунта</p>
+    <p class="sign-up-step"><span class="round-number">2</span> Подтверждение электронной почты</p>
+    <p class="sign-up-step"><span class="round-number">3</span> Завершение регистрации</p>
+  </div>
+  <form action="/auth/register" method="POST" enctype="multipart/form-data" class="sign-form">
+    <div class="div-row">
+      <div class="div-column div-column_type_left">
+        <label>Имя *
+        <input type="text" name="fname" class="sign-form__input sign-form__input_type_bordered" value="{{ inputValues.fname }}" required><span class="sign-form__label-message"></span></label>
+        <label>Фамилия
+        <input type="text" name="sname" class="sign-form__input sign-form__input_type_bordered" value="{{ inputValues.sname }}"><span class="sign-form__label-message"></span></label>
+        <label>О себе
+        <textarea type="text" name="bio" class="sign-form__input sign-form__input_type_bordered sign-form__input_size_high" value="{{ inputValues.bio }}"></textarea></label>
+      </div>
+
+      <div class="div-column div-column_type_left">
+        <label>Электронная почта *
+        <input type="text" name="email" class="sign-form__input sign-form__input_type_bordered"  value="{{ inputValues.email }}" required><span class="sign-form__label-message"></span></label>
+        <label>Пароль *
+        <input type="password" name="pass" class="sign-form__input sign-form__input_type_bordered" required><span class="sign-form__label-message"></span></label>
+        <label>Повторите пароль *
+        <input type="password" name="rpass" class="sign-form__input sign-form__input_type_bordered" required><span class="sign-form__label-message"></span></label>
+        <label>Фото профиля
+        <input type="file" name="photo" accept="image/*" class="sign-form__input sign-form__input_type_bordered"><span class="sign-form__label-message"></span></label>
+        <span class="sign-form__label-message sign-form__label-message_type_visible">{{ errorMsg }}</span>
+      </div>
+    </div>
+
+    <button type="submit" class="sign-form__button" >Регистрация</button>
+  </form>
+</div>
+
+<script>
+var pass = document.getElementsByName('pass')[0];
+var rpass = document.getElementsByName('rpass')[0];
+pass.addEventListener('blur', function() {
+  validateField('pass', this);
+});
+rpass.addEventListener('blur', function() {
+  validateField('pass', this);
+});
+rpass.addEventListener('blur', function () {
+  if(pass.classList.contains('sign-form__input_type_right')) {
+    if(pass.value == rpass.value) {
+      return;
+    } else {
+      pass.classList.add('sign-form__input_type_wrong');
+      rpass.classList.add('sign-form__input_type_wrong');
+    }
+  } else {
+    rpass.classList.add('sign-form__input_type_wrong');
+  }
+});
+
+document.getElementsByName('fname')[0].addEventListener('blur', function() {
+  validateField('name', this);
+});
+document.getElementsByName('sname')[0].addEventListener('blur', function() {
+  validateField('name', this);
+});
+document.getElementsByName('email')[0].addEventListener('blur', function() {
+  validateField('email', this);
+});
+document.getElementsByName('bio')[0].addEventListener('blur', function() {
+  validateField('bio', this);
+});
+</script>

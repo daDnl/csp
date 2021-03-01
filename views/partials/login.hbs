@@ -1,0 +1,19 @@
+<div class="login-div div_type_hidden">
+</div>
+<div class="login-div-wrapper">
+  <div class="simple-div simple-div_type_login">
+    <p class="simple-div__label">
+      Вход в аккаунт
+    </p>
+    <form action="/auth/login" class="sign-form" method="POST">
+      <input type="text" name="login-email" class="sign-form__input" value="Электронная почта" id="loginEmail">
+      <input type="text" name="login-pass" class="sign-form__input" value="Пароль" id="loginPass">
+      <span id="login-error" class="sign-form__label-message sign-form__label-message_type_visible"></span>
+      <button id="login-button" type="button" class="sign-form__button">Войти</button>
+      <span class="sign-form__text">или</span>
+      <a href="/auth/register" class="header__div-link">
+        <button type="button" class="sign-form__button sign-form__button_type_green">Присоединиться</button></a>
+      <a href="/auth/password-reset" class="sign-form__link">Забыли пароль?</a>
+    </form>
+  </div>
+</div>

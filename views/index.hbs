@@ -1,0 +1,134 @@
+<script src="https://api-maps.yandex.ru/2.1/?apikey=8cf7cf57-4619-41cd-b5a3-a3746dd27d9e&lang=ru_RU&mode=debug"></script>
+<script src="/javascripts/maps.js"></script>
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+  setHeight(document.getElementsByClassName('map-section')[0]);
+  var map
+  ymaps.ready(async function() {
+    map = initSpb();
+    map.behaviors.disable('scrollZoom');
+    var objectManager = initObjectManager();
+    var collection = await getObjectsCollection();
+    objectManager.add(collection);
+    map.geoObjects.add(objectManager);
+    setObjectsEvents(objectManager);
+    if(document.getElementById('top-preview')) {
+      var postPreview = document.getElementById('top-preview');
+      objectManager.objects.balloon.open(postPreview.getAttribute('objectId'));
+      map.setCenter(postPreview.getAttribute('coords').split(','));
+      document.getElementById('allPostsCount').remove();
+    }
+  })
+
+  var sort = 'new';
+  var search = '';
+  var type = 'any';
+
+  document.getElementById('sort_new').classList.add('feed-sort_type_selected');
+
+  document.getElementsByClassName('search-form__button')[0].addEventListener('click', function() {
+    search = document.getElementById('search').value;
+    getPosts(sort, search, type);
+    location.href = '#feed';
+  });
+
+  document.getElementsByClassName('feed-search-button')[0].addEventListener('click', function() {
+    search = document.getElementById('search-feed').value;
+    getPosts(sort, search, type);
+  });
+
+  document.getElementsByClassName('cancel-button')[0].addEventListener('click', function() {
+    search = '';
+    getPosts('new', search, type);
+    Array.prototype.forEach.call(document.getElementsByClassName('feed-sort'), function (elem) {
+      elem.classList.remove('feed-sort_type_selected');
+    });
+    document.getElementById('sort_new').classList.add('feed-sort_type_selected');
+    document.getElementById('search-feed').value = '';
+  });
+
+  document.getElementById('sort_new').addEventListener('click', function(e) {
+    getPosts('new', search, type);
+    Array.prototype.forEach.call(document.getElementsByClassName('feed-sort'), function (elem) {
+      elem.classList.remove('feed-sort_type_selected');
+    });
+    e.target.classList.add('feed-sort_type_selected');
+    sort = 'new';
+  });
+  document.getElementById('sort_useful').addEventListener('click', function(e) {
+    getPosts('useful', search, type);
+    Array.prototype.forEach.call(document.getElementsByClassName('feed-sort'), function (elem) {
+      elem.classList.remove('feed-sort_type_selected');
+    });
+    e.target.classList.add('feed-sort_type_selected');
+    sort = 'useful';
+  });
+  document.getElementById('sort_comments').addEventListener('click', function(e) {
+    getPosts('comments', search, type);
+    Array.prototype.forEach.call(document.getElementsByClassName('feed-sort'), function (elem) {
+      elem.classList.remove('feed-sort_type_selected');
+    });
+    e.target.classList.add('feed-sort_type_selected');
+    sort = 'comments';
+  });
+
+  document.getElementById('feed_type').addEventListener('change', function(e) {
+    var select = e.target;
+    type = select.options[select.selectedIndex].value;
+    getPosts(sort, search, type);
+  });
+})
+</script>
+<div class="map-section">
+  <div id="first_map" class="map"></div>
+
+  <div class="div-column">
+    <div class="simple-div simple-div_type_plain-text" id="allPostsCount">
+      <span>На текущий момент сообщений опубликовано: {{ allPostsCount }} </span>
+    </div>
+
+    <div class="simple-div simple-div_type_plain-text">
+      <span>Были свидетелем какого-либо происшествия или нарушения? Используйте поиск, чтобы найти его</span>
+      <form class="search-form">
+        <input type="search" name="search" id="search" class="search-form__bar">
+
+        <button type="button" class="search-form__button">
+          <img src="/images/icons/search.png" alt="icon" class="button-icon">
+        </button>
+      </form>
+    </div>
+
+    {{> postPreview}}
+  </div>
+</div>
+
+<div class="simple-div simple-div_type_feed-top">
+  <span class="feed-sort hover-cursor-pointer" id="sort_new">По новизне </span>
+  <span class="feed-sort hover-cursor-pointer" id="sort_useful">По полезности </span>
+  <span class="feed-sort hover-cursor-pointer" id="sort_comments">По обсуждаемости </span>
+  <span class="feed-sort feed-sort_type_large">
+    <select id="feed_type" class="sign-form__input sign-form__input_type_bordered">
+      <option value="any" default>--- Любой ---</option>
+      {{#each postTypes}}
+        <option value="{{ this._id }}">{{ this.type }}</option>
+      {{/each}}
+    </select>
+  </span>
+  <span class="feed-sort feed-sort_type_large">
+      <input type="search" name="search" id="search-feed" class="sign-form__input sign-form__input_type_feed">
+      <button type="button" class="feed-search-button">
+        Найти
+      </button>
+
+    <button type="button" class="feed-search-button cancel-button">
+      Сбросить
+    </button>
+  </span>
+</div>
+<div class="simple-div simple-div_type_fullpage">
+
+  <div id="feed" class="feed-wrapper">
+    {{> feed}}
+  </div>
+</div>

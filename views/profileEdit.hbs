@@ -1,0 +1,62 @@
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.getElementById('changePassButton').addEventListener('click', function (e) {
+    toggleReplyForm('changePass', e.target);
+  });
+
+  document.getElementById('photoInput').addEventListener('change', function (e) {
+    var errField = document.getElementsByClassName('sign-form__label-message_type_visible')[0];
+
+    if(validateField('media', document.getElementById('photoInput'), errField)) {
+      var reader = new FileReader();
+      reader.onload = function (ev) {
+          document.getElementsByClassName('profile-photo')[0].src = ev.target.result;
+      }
+      reader.readAsDataURL(e.target.files[0]);
+    }
+  });
+
+});
+</script>
+<form action="/users/profile" method="PUT" enctype="multipart/form-data" class="simple-div simple-div_type_profile">
+  <h2>Редактировать профиль</h2>
+
+  <div class="div-row div-row_type_profile">
+      <div class="profile-photo-edit">
+        {{#if user.photo}}
+          <img src="{{ user.photo }}" alt="profile photo" class="profile-photo">
+        {{else}}
+          <img src="https://res.cloudinary.com/dedk0myxj/image/upload/v1589825037/icon/profile-photo-placeholder_j4zy6i.png" alt="user-profile-photo-placeholder" class="profile-photo">
+        {{/if}}
+        <input id="photoInput" type="file" name="photo" accept="image/*" class="sign-form__input sign-form__input_type_bordered">
+        <span class="sign-form__label-message sign-form__label-message_type_visible"></span>
+      </div>
+
+      <div class="div-column div-column_type_left">
+        <input type="hidden" value="{{ user._id }}" name="userid">
+        <label class="profile-edit-row">Имя
+        <input type="text" name="fname" class="sign-form__input sign-form__input_type_bordered" value="{{ user.fname }}"><span class="sign-form__label-message"></span></label>
+        <label class="profile-edit-row">Фамилия
+        <input type="text" name="sname" class="sign-form__input sign-form__input_type_bordered" value="{{ user.sname }}"><span class="sign-form__label-message"></span></label>
+        <label class="profile-edit-row">О себе
+        <textarea type="text" name="bio" class="sign-form__input sign-form__input_type_bordered sign-form__input_size_high">{{ user.bio }}</textarea></label>
+
+        <div class="simple-div_type_profile">
+          <a class="comment__div-link hover-cursor-pointer" id="changePassButton">Сменить пароль <span></span></a>
+        </div>
+
+        <div class="feed-wrapper div_type_hidden" id="changePass">
+          <label class="profile-edit-row">Текущий пароль
+          <input type="password" name="currpass" class="sign-form__input sign-form__input_type_bordered"><span class="sign-form__label-message"></span></label><br>
+          <label class="profile-edit-row">Новый пароль
+          <input type="password" name="newpass" class="sign-form__input sign-form__input_type_bordered"><span class="sign-form__label-message"></span></label><br>
+          <label class="profile-edit-row">Повторите новый пароль
+          <input type="password" name="rnewpass" class="sign-form__input sign-form__input_type_bordered"><span class="sign-form__label-message"></span></label><br>
+        </div>
+
+        <span class="sign-form__label-message sign-form__label-message_type_visible">{{ errorMsg }}</span>
+      </div>
+
+  </div>
+  <button type="submit" class="sign-form__button">Принять изменения</button>
+</form>

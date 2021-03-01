@@ -1,0 +1,109 @@
+<script src="https://api-maps.yandex.ru/2.1/?apikey=8cf7cf57-4619-41cd-b5a3-a3746dd27d9e&lang=ru_RU&mode=debug"></script>
+<script src="/javascripts/maps.js"></script>
+<script src="https://yastatic.net/s3/mapsapi-jslibs/heatmap/0.0.1/heatmap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var months = ['Январь', 'Февраль', 'Март',
+  'Апрель', 'Май', 'Июнь', 'Июль', 'Август',
+  'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+  Chart.defaults.global.defaultFontColor = '#979797';
+  Chart.defaults.global.defaultFontSize = vwToPx(1);
+
+  getStats()
+  .then(function (stats) {
+    var bar = {}
+    var line = {}
+    bar.labels = [];
+    bar.values = [];
+    line.labels = [];
+    line.values = [];
+
+    stats.typesBar.forEach(function (item) {
+      const symbols = 17; // MIN SYMBOLS TO WRAP LINES
+      if(item.type.length >= symbols) {
+        bar.labels.push(item.type.split(' '));
+      } else {
+        bar.labels.push(item.type);
+      }
+      bar.values.push(item.count);
+    })
+
+    stats.reportsLine.forEach(function (item) {
+      line.labels.push(months[item.month]);
+      line.values.push(item.count);
+    })
+
+    bar.ctx = document.getElementById('typesBar').getContext('2d');
+    line.ctx = document.getElementById('reportsLine').getContext('2d');
+
+    getLineChart(line.ctx, line.values, line.labels);
+    getBarChart(bar.ctx, bar.values, bar.labels);
+
+    var totalPostsElem = document.getElementById('totalsPosts');
+    var totalsPostsToday = document.getElementById('totalsPostsToday');
+    var totalsComments = document.getElementById('totalsComments');
+    var totalsUsers = document.getElementById('totalsUsers');
+
+    totalPostsElem.childNodes[1].textContent = stats.totals.posts;
+    totalsPostsToday.childNodes[1].textContent = stats.totals.postsToday;
+    totalsComments.childNodes[1].textContent = stats.totals.comments;
+    totalsUsers.childNodes[1].textContent = stats.totals.users;
+
+    if(stats.totals.comments % 10 === 1) {
+      totalsComments.childNodes[3].textContent = 'Комментарий';
+    } else if(stats.totals.comments % 10 > 1 && stats.totals.comments % 10 < 5) {
+      totalsComments.lastChild[3].textContent = 'Комментария';
+    } else {
+      totalsComments.childNodes[3].textContent = 'Комментариев';
+    }
+
+    if(stats.totals.users % 10 === 1) {
+      totalsUsers.childNodes[3].textContent = 'Пользователь';
+    } else if(stats.totals.comments % 10 > 1 && stats.totals.comments % 10 < 5) {
+      totalsUsers.childNodes[3].textContent = 'Пользователя';
+    } else {
+      totalsUsers.childNodes[3].textContent = 'Пользователей';
+    }
+  })
+  .catch(function (e) {
+    console.log(e);
+  })
+
+});
+</script>
+<div class="simple-div simple-div_type_post-details">
+  <h2>Статистика в реальном времени</h2>
+  <div class="stats-row">
+    <div class="simple-div simple-div_type_stats" id="totalsPosts">
+      <span class="stats-main-text"></span>
+      <p class="stats-small-label">Всего опубликовано</p>
+    </div>
+    <div class="simple-div simple-div_type_stats" id="totalsPostsToday">
+      <span class="stats-main-text"></span>
+      <p class="stats-small-label">Опубликовано за сегодня</p>
+    </div>
+    <div class="simple-div simple-div_type_stats" id="totalsComments">
+      <span class="stats-main-text"></span>
+      <p class="stats-small-label">Комментариев</p>
+    </div>
+    <div class="simple-div simple-div_type_stats" id="totalsUsers">
+      <span class="stats-main-text"></span>
+      <p class="stats-small-label">Пользователей</p>
+    </div>
+  </div>
+
+  <h3 class="stats-small-label">Количество публикаций по типам</h4>
+  <div class="stats-row">
+    <div class="stats-chart">
+      <canvas id="typesBar"></canvas>
+    </div>
+  </div>
+
+  <h3 class="stats-small-label">Количество опубликованных проблем за этот год по месяцам</h4>
+  <div class="stats-row">
+    <div class="stats-chart">
+      <canvas id="reportsLine"></canvas>
+    </div>
+  </div>
+</div>

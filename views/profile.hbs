@@ -1,0 +1,123 @@
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var userId = '{{{ user._id }}}';
+  getPosts('new', '', 'any', userId);
+
+  var sort = 'new';
+  var search = '';
+  var type = 'any';
+
+  document.getElementById('sort_new').classList.add('feed-sort_type_selected');
+
+  document.getElementsByClassName('feed-search-button')[0].addEventListener('click', function() {
+    search = document.getElementById('search-feed').value;
+    getPosts(sort, search, type, userId);
+  });
+
+  document.getElementsByClassName('cancel-button')[0].addEventListener('click', function() {
+    search = '';
+    getPosts('new', search, type, userId);
+    Array.prototype.forEach.call(document.getElementsByClassName('feed-sort'), function (elem) {
+      elem.classList.remove('feed-sort_type_selected');
+    });
+    document.getElementById('sort_new').classList.add('feed-sort_type_selected');
+    document.getElementById('search-feed').value = '';
+  });
+
+  document.getElementById('sort_new').addEventListener('click', function(e) {
+    getPosts('new', search, type, userId);
+    Array.prototype.forEach.call(document.getElementsByClassName('feed-sort'), function (elem) {
+      elem.classList.remove('feed-sort_type_selected');
+    });
+    e.target.classList.add('feed-sort_type_selected');
+    sort = 'new';
+  });
+  document.getElementById('sort_useful').addEventListener('click', function(e) {
+    getPosts('useful', search, type, userId);
+    Array.prototype.forEach.call(document.getElementsByClassName('feed-sort'), function (elem) {
+      elem.classList.remove('feed-sort_type_selected');
+    });
+    e.target.classList.add('feed-sort_type_selected');
+    sort = 'useful';
+  });
+  document.getElementById('sort_comments').addEventListener('click', function(e) {
+    getPosts('comments', search, type, userId);
+    Array.prototype.forEach.call(document.getElementsByClassName('feed-sort'), function (elem) {
+      elem.classList.remove('feed-sort_type_selected');
+    });
+    e.target.classList.add('feed-sort_type_selected');
+    sort = 'comments';
+  });
+
+  document.getElementById('feed_type').addEventListener('change', function(e) {
+    var select = e.target;
+    type = select.options[select.selectedIndex].value;
+    getPosts(sort, search, type, userId);
+  });
+});
+</script>
+
+<div class="simple-div simple-div_type_profile">
+  <div class="div-row div-row_type_profile">
+    {{#if user.photo}}
+      <img src="{{ user.photo }}" alt="profile photo" class="profile-photo">
+    {{else}}
+      <img src="/images/icons/profile-photo.png" alt="user-profile-photo-placeholder" class="profile-photo">
+    {{/if}}
+
+    <div class="simple-div simple-div-profile-top">
+      <div class="simple-div-header">
+        <h2>{{ user.fullname }}</h2>
+        <span>Записей добавлено: {{ report_count }}</span>
+      </div>
+      <div class="simple-div-text">
+        {{#if user.bio}}
+          <p>{{ user.bio }}</p>
+        {{else}}
+          <p>Описание профиля отсутствует</p>
+        {{/if}}
+      </div>
+      {{#if self}}
+        <div class="simple-div-text">
+          <a href="/users/profile?edit=1" class="comment__div-link hover-cursor-pointer">Редактировать профиль</a>
+        </div>
+      {{/if}}
+    </div>
+  </div>
+  <h3>
+    {{#if self}}
+      Ваши публикации:
+    {{else}}
+      Публикации пользователя:
+    {{/if}}
+  </h3>
+
+</div>
+<div class="simple-div simple-div_type_feed-top">
+  <span class="feed-sort hover-cursor-pointer" id="sort_new">По новизне </span>
+  <span class="feed-sort hover-cursor-pointer" id="sort_useful">По полезности </span>
+  <span class="feed-sort hover-cursor-pointer" id="sort_comments">По обсуждаемости </span>
+  <span class="feed-sort feed-sort_type_large">
+    <select id="feed_type" class="sign-form__input sign-form__input_type_bordered">
+      <option value="any" default>--- Любой ---</option>
+      {{#each postTypes}}
+        <option value="{{ this._id }}">{{ this.type }}</option>
+      {{/each}}
+    </select>
+  </span>
+  <span class="feed-sort feed-sort_type_large">
+      <input type="search" name="search" id="search-feed" class="sign-form__input sign-form__input_type_feed">
+      <button type="button" class="feed-search-button">
+        Найти
+      </button>
+
+    <button type="button" class="feed-search-button cancel-button">
+      Сбросить
+    </button>
+  </span>
+</div>
+<div class="simple-div simple-div_type_profile">
+  <div id="feed" class="feed-wrapper">
+    {{> feed}}
+  </div>
+</div>

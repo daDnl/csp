@@ -1,0 +1,65 @@
+{{#if postPreview }}
+<div id="top-preview" objectId="{{ postPreview._id }}" coords="{{ postPreview.coordinates.x }},{{ postPreview.coordinates.y }}" class="simple-div">
+  <a class="simple-div-header__link" href="{{ postPreview.url }}" target="_blank">
+    <div class="simple-div-header">
+      <p class="simple-div-header__title">
+        <img src="{{ postPreview.post_type.icon }}" alt="post-icon" class="post-icon">
+        <span>{{ postPreview.post_type.type }} по адресу: {{ postPreview.address }}</span>
+      </p>
+      <p class="simple-div-header__date">
+        {{ postPreview.created }}
+      </p>
+    </div>
+  </a>
+  <p class="simple-div-text">{{ postPreview.text }}
+  {{#if postPreview.attached }}
+    <div class="simple-div-media-section">
+      {{#each postPreview.attached }}
+        {{#if this.image }}
+          <img class="simple-div__image-preview" alt="post-photo" src="{{ this.src }}">
+        {{else}}
+          <video height="200" width="200" controls>
+            <source src="{{ this.src }}" type="video/mp4">
+          </video>
+        {{/if}}
+      {{/each}}
+    </div>
+  {{/if}}
+
+  <div class="simple-div-footer">
+    {{#if authed}}
+      {{#if postPreview.isLiked }}
+        <div id="like{{ postPreview._id }}" class="like-button like-button_type_active" onclick="postAct('{{ postPreview._id }}')">
+      {{else}}
+        <div id="like{{ postPreview._id }}" class="like-button" onclick="postAct('{{ postPreview._id }}')">
+      {{/if}}
+    {{else}}
+    <div id="like{{ postPreview._id }}" class="like-button" onclick="toggleLogin()">
+    {{/if}}
+      <span class="like-button__checkmark">&#10004; </span>
+      <span class="like-button__label">Полезно</span>
+      <span class="like-button__count">{{ postPreview.likes_count }}</span>
+    </div>
+
+    <a class="header__div-link" href="{{ postPreview.url }}" target="_blank">
+    <div class="reply-button">
+      <img src="/images/icons/comment.png" alt="icon" class="button-icon">
+      <span class="reply-button__count">{{ postPreview.reply_count }}</span>
+    </div>
+    </a>
+
+    <a class="comment__div-link" href="/users/{{ postPreview.author._id }}">
+    <p class="reply-button">
+      Автор: &nbsp;
+      <span class="hover-cursor-pointer">{{ postPreview.author.fullname }}</span>
+    </p>
+    </a>
+
+    {{#if postPreview.isEditable}}
+      <a class="comment__div-link" onclick="deletePost('{{ postPreview._id }}')">
+          <span class="hover-cursor-pointer delete-button">&#10007;</span>
+      </a>
+    {{/if}}
+  </div>
+</div>
+{{/if}}

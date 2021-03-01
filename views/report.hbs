@@ -1,0 +1,103 @@
+<script src="https://api-maps.yandex.ru/2.1/?apikey=8cf7cf57-4619-41cd-b5a3-a3746dd27d9e&lang=ru_RU"></script>
+<script src="/javascripts/maps.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  setHeight(document.getElementsByClassName('map-section')[0]);
+  var map;
+  ymaps.ready(function() {
+    map = initSpb();
+    var addressField = document.getElementById('address');
+    var coordsField = document.getElementById('coords');
+    addressField.addEventListener('blur', function() {
+      map.geoObjects.removeAll();
+      ymaps.geocode(this.value, { boundedBy: [[60.229493, 29.378127], [59.617953, 30.781410]], results: 1, strictBounds: true })
+      .then(async function (geocoder) {
+          var coords = await geocoder.geoObjects.get(0).geometry.getCoordinates();
+          setCenterZoom(map, 15, coords);
+          var inputPlacemark = createPlacemark(coords, {
+            preset: 'islands#redStretchyIcon',
+            draggable: true
+          });
+          map.geoObjects.add(inputPlacemark);
+          setAddressContents(inputPlacemark, addressField, coordsField);
+        });
+    });
+    setUserInput(map, addressField, coordsField);
+    var suggestView = new ymaps.SuggestView('address', { boundedBy: [[60.229493, 29.378127], [59.617953, 30.781410]] });
+    var fileFields = document.getElementsByClassName('sign-form__input_type_file');
+    var errorField = document.getElementsByClassName('sign-form__label-message')[0];
+
+    Array.prototype.forEach.call(fileFields, function(field, index) {
+      field.addEventListener('change', function() {
+        if(validateField('media', this, errorField)) {
+          document.getElementsByClassName('sign-form__file-dummy')[index].classList.remove('sign-form__file-dummy_type_failed');
+          document.getElementsByClassName('sign-form__file-dummy')[index].classList.add('sign-form__file-dummy_type_success');
+        } else {
+          document.getElementsByClassName('sign-form__file-dummy')[index].classList.remove('sign-form__file-dummy_type_success');
+          document.getElementsByClassName('sign-form__file-dummy')[index].classList.add('sign-form__file-dummy_type_failed');
+        };
+      });
+    });
+
+  });
+});
+</script>
+<div class="map-section">
+  <div id="first_map" class="map map_type_select"></div>
+
+  <div class="simple-div simple-div_type_report">
+    <form action="/posts/report" method="POST" enctype="multipart/form-data" class="sign-form sign-form_type_report">
+      <div class="div-row">
+        <div class="div-column div-column_type_left">
+          <label class="sign-form__label">О какой именно проблеме Вы хотите сообщить?
+          <select name="post_type" class="sign-form__input sign-form__input_type_bordered" required="required">
+            {{#each postTypes}}
+            <option value="{{this._id}}">{{this.type}}</option>
+            {{/each}}
+          </select></label>
+          <label class="sign-form__label">Укажите местоположение на карте или введите адрес
+          <input type="text" id="address" name="address" class="sign-form__input sign-form__input_type_bordered" required="required" value="{{ inputValues.address}}"></label>
+          <input type="hidden" id="coords" name="coords" value="{{ inputValues.coords}}">
+
+          <div class="sign-form__label">Вы можете прикрепить до 6 фотографий или видео
+            <div class="div-row div-row_type_files">
+              <div class="sign-form__file-dummy">
+                <input class="sign-form__input sign-form__input_type_file sign-form__input_type_bordered" type="file" name="media[]" accept="image/* video/*"/>
+              </div>
+              <div class="sign-form__file-dummy">
+                <input class="sign-form__input sign-form__input_type_file sign-form__input_type_bordered" type="file" name="media[]" accept="image/* video/*"/>
+              </div>
+              <div class="sign-form__file-dummy">
+                <input class="sign-form__input sign-form__input_type_file sign-form__input_type_bordered" type="file" name="media[]" accept="image/* video/*"/>
+              </div>
+            </div>
+            <div class="div-row div-row_type_files">
+              <div class="sign-form__file-dummy">
+                <input class="sign-form__input sign-form__input_type_file sign-form__input_type_bordered" type="file" name="media[]" accept="image/* video/*"/>
+              </div>
+              <div class="sign-form__file-dummy">
+                <input class="sign-form__input sign-form__input_type_file sign-form__input_type_bordered" type="file" name="media[]" accept="image/* video/*"/>
+              </div>
+              <div class="sign-form__file-dummy">
+                <input class="sign-form__input sign-form__input_type_file sign-form__input_type_bordered" type="file" name="media[]" accept="image/* video/*"/>
+              </div>
+            </div>
+            <span class="sign-form__label-message sign-form__label-message_type_visible">{{ errorMsg }}</span>
+          </div>
+        </div>
+
+        <div class="div-column div-column_type_left div-column_size_wide">
+          <label class="sign-form__label">Опишите произошедшее
+          <textarea type="text" name="text" class="sign-form__input sign-form__input_type_bordered sign-form__input_size_large" value="{{ inputValues.text }}"></textarea></label>
+        </div>
+      </div>
+
+      {{#if authed}}
+        <button type="submit" class="sign-form__button">Опубликовать</button>
+      {{else}}
+        <button type="button" class="sign-form__button" onclick="toggleLogin()">Опубликовать</button>
+      {{/if}}
+
+    </form>
+  </div>
+</div>

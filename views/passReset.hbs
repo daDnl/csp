@@ -1,0 +1,24 @@
+<div class="simple-div simple-div_type_fullpage">
+  <div class="simple-div-header sign-up-steps-bar">
+    <p class="sign-up-step sign-up-step_type_selected"><span class="round-number round-number_type_selected">1</span> Поиск аккаунта</p>
+    <p class="sign-up-step"><span class="round-number">2</span> Переход по ссылке в письме</p>
+    <p class="sign-up-step"><span class="round-number">3</span> Смена пароля</p>
+  </div>
+
+  <form action="/auth/password-reset" method="POST" class="sign-form">
+    <div class="div-column">
+      <label>Введите адрес электронной почты, который был указан при регистрации
+        <input type="text" name="email" class="sign-form__input sign-form__input_type_bordered" value="{{ email }}" required></label>
+    </div>
+    <span class="sign-form__label-message sign-form__label-message_type_visible">{{ errorMsg }}</span>
+    <button type="submit" class="sign-form__button">Подтвердить</button>
+  </form>
+</div>
+
+ <script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.getElementsByName('email')[0].addEventListener('blur', function() {
+    validateField('email', this);
+  });
+})
+ </script>

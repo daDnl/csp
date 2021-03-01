@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>{{title}}</title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="/javascripts/scripts.js"></script>
+</head>
+<body>
+  {{#if authed}}
+    <div class="main">
+    {{> header_authed}}
+  {{else}}
+    {{> login}}
+    <div class="main">
+    {{> header}}
+  {{/if}}
+
+  {{{body}}}
+
+  </div>
+
+{{#if loginVisible}}
+<script>
+toggleLogin(document.getElementsByClassName('login-div')[0]);
+</script>
+{{/if}}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  window.addEventListener('scroll', minimizeHeader);
+
+  try {
+    document.getElementById('login-nav-item').addEventListener('click', function () {
+      toggleLogin();
+    });
+
+    document.getElementsByClassName('login-div')[0].addEventListener('click', function () {
+      toggleLogin();
+    });
+
+    document.getElementById('login-button').addEventListener('click', tryLogin);
+    document.getElementById('loginEmail').addEventListener('click', loginFieldsClick);
+    document.getElementById('loginPass').addEventListener('click', loginFieldsClick);
+    document.getElementById('loginEmail').addEventListener('blur', loginFieldsBlur);
+    document.getElementById('loginPass').addEventListener('blur', loginFieldsBlur);
+  } catch {}
+})
+</script>
+</body>
+</html>

@@ -1,0 +1,300 @@
+<script src="https://api-maps.yandex.ru/2.1/?apikey=8cf7cf57-4619-41cd-b5a3-a3746dd27d9e&lang=ru_RU"></script>
+<script src="/javascripts/maps.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.getElementById('toggleMediaButton').addEventListener('click', function(e) {
+    if(e.target.lastChild.textContent == '+') {
+      document.getElementsByClassName('sign-form__label_type_comment-media')[0].style.display = 'block';
+      e.target.lastChild.textContent = '-';
+    } else {
+      document.getElementsByClassName('sign-form__label_type_comment-media')[0].style.display = 'none';
+      e.target.lastChild.textContent = '+';
+    }
+  });
+
+  var map;
+  ymaps.ready(function() {
+    map = initSpb();
+    var postDetails = document.getElementById('postDetails');
+    map.setCenter(postDetails.getAttribute('coords').split(','));
+    map.geoObjects.add(createPlacemark(postDetails.getAttribute('coords').split(','), {}, {
+      preset: 'islands#redStretchyIcon',
+      draggable: false
+      })
+    );
+
+    var fileFields = document.getElementsByClassName('sign-form__input_type_file');
+    var errorFields = document.getElementsByClassName('sign-form__label-message');
+
+    Array.prototype.forEach.call(fileFields, function(field, index) {
+      field.addEventListener('change', function() {
+        var errorFieldIndex = Math.floor(index/6);
+        if(validateField('media', this, errorFields[errorFieldIndex])) {
+          document.getElementsByClassName('sign-form__file-dummy')[index].classList.remove('sign-form__file-dummy_type_failed');
+          document.getElementsByClassName('sign-form__file-dummy')[index].classList.add('sign-form__file-dummy_type_success');
+        } else {
+          document.getElementsByClassName('sign-form__file-dummy')[index].classList.remove('sign-form__file-dummy_type_success');
+          document.getElementsByClassName('sign-form__file-dummy')[index].classList.add('sign-form__file-dummy_type_failed');
+        };
+      });
+    });
+
+  });
+});
+</script>
+
+
+
+<!-- POST DETAILS BLOCK  -->
+<div id="postDetails" objectId="{{ postDetails._id }}" coords="{{ postDetails.coordinates.x }},{{ postDetails.coordinates.y }}" class="simple-div simple-div_type_post-details">
+  <a class="simple-div-header__link" href="{{ postDetails.url }}">
+    <div class="simple-div-header">
+      <p class="simple-div-header__title">
+        <img src="{{ postDetails.post_type.icon }}" alt="post-icon" class="post-icon">
+        <span>{{ postDetails.post_type.type }} по адресу: {{ postDetails.address }}</span>
+      </p>
+      <p class="simple-div-header__date">
+        {{ postDetails.created }}
+      </p>
+    </div>
+  </a>
+
+  <div id="first_map" class="details-map"></div>
+  <p class="simple-div-text">{{ postDetails.text }}
+  {{#if postDetails.attached }}
+    <div class="simple-div-media-section">
+      {{#each postDetails.attached }}
+        {{#if this.image }}
+          <img class="simple-div__image-preview" alt="post-photo" src="{{ this.src }}">
+        {{else}}
+          <video>
+            <source src="{{ this.src }}">
+          </video>
+        {{/if}}
+      {{/each}}
+    </div>
+  {{/if}}
+
+  <div class="simple-div-footer">
+    {{#if authed}}
+      {{#if postDetails.isLiked }}
+        <div id="like{{ postDetails._id }}" class="like-button like-button_type_active" onclick="postAct('{{ postDetails._id }}')">
+      {{else}}
+        <div id="like{{ postDetails._id }}" class="like-button" onclick="postAct('{{ postDetails._id }}')">
+      {{/if}}
+    {{else}}
+    <div id="like{{ postDetails._id }}" class="like-button" onclick="toogleLogin()">
+    {{/if}}
+      <span class="like-button__checkmark">&#10004; </span>
+      <span class="like-button__label">Полезно</span>
+      <span class="like-button__count">{{ postDetails.likes_count }}</span>
+    </div>
+
+    <a class="header__div-link" href="#comments">
+    <div class="reply-button">
+      <img src="/images/icons/comment.png" alt="icon" class="button-icon">
+      <span class="reply-button__count">{{ postDetails.reply_count }}</span>
+    </div>
+    </a>
+
+    <a class="comment__div-link" href="/users/{{ postDetails.author._id }}">
+    <p class="reply-button">
+      Автор: &nbsp;
+      <span class="hover-cursor-pointer">{{ postDetails.author.fullname }} &nbsp; &nbsp;</span>
+      {{#if postDetails.author.photo }}
+        <img src="{{ postDetails.author.photo }}" alt="user-profile-photo" class="comment-user-photo">
+      {{else}}
+        <img src="https://res.cloudinary.com/dedk0myxj/image/upload/v1589825037/icon/profile-photo-placeholder_j4zy6i.png" alt="user-profile-photo-placeholder" class="comment-user-photo">
+      {{/if}}
+    </p>
+    </a>
+
+    {{#if postDetails.isEditable}}
+    <div>
+      <a class="comment__div-link" onclick="deletePost('{{ postDetails._id }}')">
+          <span class="hover-cursor-pointer delete-button">&#10007;</span>
+      </a>
+    </div>
+    {{/if}}
+  </div>
+
+</div>
+<!-- POST DETAILS BLOCK END -->
+
+<div class="simple-div simple-div_type_comment-section">
+  <!-- ADD COMMENT FORM -->
+  <div class="simple-div simple-div_type_comment">
+    <form action="/posts/comment" method="POST" enctype="multipart/form-data" class="sign-form">
+      <input type="hidden" name="post_id" value="{{ postDetails._id }}">
+      <label class="sign-form__label sign-form__label_type_big">Оставить комментарий
+      <textarea type="text" name="text" class="sign-form__input sign-form__input_type_bordered sign-form__input_size_medium"></textarea></label>
+      <p class="hover-cursor-pointer" id="toggleMediaButton">Прикрепить изображение или видео <span>+</span></p>
+        <div class="sign-form__label sign-form__label_type_comment-media">
+          <div class="div-row div-row_type_files">
+            <div class="sign-form__file-dummy">
+              <input class="sign-form__input sign-form__input_type_file sign-form__input_type_bordered" type="file" name="media[]" accept="image/* video/*"/>
+            </div>
+            <div class="sign-form__file-dummy">
+              <input class="sign-form__input sign-form__input_type_file sign-form__input_type_bordered" type="file" name="media[]" accept="image/* video/*"/>
+            </div>
+            <div class="sign-form__file-dummy">
+              <input class="sign-form__input sign-form__input_type_file sign-form__input_type_bordered" type="file" name="media[]" accept="image/* video/*"/>
+            </div>
+            <div class="sign-form__file-dummy">
+              <input class="sign-form__input sign-form__input_type_file sign-form__input_type_bordered" type="file" name="media[]" accept="image/* video/*"/>
+            </div>
+            <div class="sign-form__file-dummy">
+              <input class="sign-form__input sign-form__input_type_file sign-form__input_type_bordered" type="file" name="media[]" accept="image/* video/*"/>
+            </div>
+            <div class="sign-form__file-dummy">
+              <input class="sign-form__input sign-form__input_type_file sign-form__input_type_bordered" type="file" name="media[]" accept="image/* video/*"/>
+            </div>
+          </div>
+          <span class="sign-form__label-message sign-form__label-message_type_visible">{{ errorMsg }}</span>
+        </div>
+        {{#if authed}}
+          <button type="submit" class="sign-form__button">Опубликовать</button>
+        {{else}}
+          <button type="button" class="sign-form__button" onclick="toggleLogin()">Опубликовать</button>
+        {{/if}}
+    </form>
+  </div>
+  <!-- ADD COMMENT FORM END -->
+
+  <span id="comments"></span>
+  {{#each comments}}
+    <!-- COMMENT INSTANCE BLOCK -->
+    <div class="simple-div simple-div_type_comment">
+      <div class="simple-div-header">
+        <a class="comment__div-link" href="/users/{{ this.comment.author._id }}">
+        <p class="simple-div-header__title">
+          {{#if this.comment.author.photo }}
+            <img src="{{ this.comment.author.photo }}" alt="user-profile-photo" class="comment-user-photo">
+          {{else}}
+            <img src="https://res.cloudinary.com/dedk0myxj/image/upload/v1589825037/icon/profile-photo-placeholder_j4zy6i.png" alt="user-profile-photo-placeholder" class="comment-user-photo">
+          {{/if}}
+          <span class="hover-cursor-pointer"> {{ this.comment.author.fullname }}</span>
+        </p>
+        </a>
+        <p class="simple-div-header__date">
+          {{ this.comment.createdFormated }}
+        </p>
+        {{#if this.comment.isEditable }}
+        <p>
+          <a class="comment__div-link" onclick="deleteComment('{{ this.comment._id }}')">
+              <span class="hover-cursor-pointer delete-button">&#10007;</span>
+          </a>
+        </p>
+        {{/if}}
+      </div>
+
+      <p class="simple-div-text">{{ this.comment.text }}</p>
+      {{#if this.comment.attached }}
+        <div class="simple-div-media-section">
+          {{#each this.comment.attached }}
+            {{#if this.image }}
+              <img class="simple-div__image-preview" alt="post-photo" src="{{ this.src }}">
+            {{else}}
+              <video>
+                <source src="{{ this.src }}">
+              </video>
+            {{/if}}
+          {{/each}}
+        </div>
+      {{/if}}
+
+      <div class="simple-div-footer">
+        <span>Ответов: {{ this.comment.reply_count }} </span>
+        <span class="hover-cursor-pointer" onclick="toggleReplyForm('{{ this.comment._id }}', this)">&nbsp;&nbsp;&nbsp; Ответить <b></b></span>
+      </div>
+
+      <!-- ADD REPLY FORM -->
+      <form id="{{ this.comment._id }}" action="/posts/comment" method="POST" enctype="multipart/form-data" class="sign-form sign-form_type_reply">
+        <input type="hidden" name="post_id" value="{{ this.comment.post }}">
+        <input type="hidden" name="parent" value="{{ this.comment._id }}">
+        <label class="sign-form__label sign-form__label_type_big">Оставить ответ
+        <textarea type="text" name="text" class="sign-form__input sign-form__input_type_bordered sign-form__input_size_medium"></textarea></label>
+        <p>Вы можете прикрепить до 6 фотографий или видео</p>
+          <div class="sign-form__label sign-form__label_type_reply-media">
+            <div class="div-row div-row_type_files">
+              <div class="sign-form__file-dummy">
+                <input class="sign-form__input sign-form__input_type_file sign-form__input_type_bordered" type="file" name="media[]" accept="image/* video/*"/>
+              </div>
+              <div class="sign-form__file-dummy">
+                <input class="sign-form__input sign-form__input_type_file sign-form__input_type_bordered" type="file" name="media[]" accept="image/* video/*"/>
+              </div>
+              <div class="sign-form__file-dummy">
+                <input class="sign-form__input sign-form__input_type_file sign-form__input_type_bordered" type="file" name="media[]" accept="image/* video/*"/>
+              </div>
+              <div class="sign-form__file-dummy">
+                <input class="sign-form__input sign-form__input_type_file sign-form__input_type_bordered" type="file" name="media[]" accept="image/* video/*"/>
+              </div>
+              <div class="sign-form__file-dummy">
+                <input class="sign-form__input sign-form__input_type_file sign-form__input_type_bordered" type="file" name="media[]" accept="image/* video/*"/>
+              </div>
+              <div class="sign-form__file-dummy">
+                <input class="sign-form__input sign-form__input_type_file sign-form__input_type_bordered" type="file" name="media[]" accept="image/* video/*"/>
+              </div>
+            </div>
+            <span class="sign-form__label-message sign-form__label-message_type_visible"></span>
+          </div>
+        {{#if authed}}
+          <button type="submit" class="sign-form__button">Опубликовать</button>
+        {{else}}
+          <button type="button" class="sign-form__button" onclick="toggleLogin">Опубликовать</button>
+        {{/if}}
+      </form>
+      <!-- ADD REPLY FORM END -->
+
+    </div>
+    <!-- COMMENT INSTANCE BLOCK END -->
+
+    {{#if this.replies}}
+      {{#each this.replies}}
+      <!-- REPLY INSTANCE BLOCK -->
+      <div class="simple-div simple-div_type_reply">
+        <div class="simple-div-header">
+          <a class="comment__div-link" href="/users/{{ this.author._id }}">
+          <p class="simple-div-header__title">
+            {{#if this.photo }}
+              <img src="{{ this.photo }}" alt="user-profile-photo" class="comment-user-photo">
+            {{else}}
+              <img src="https://res.cloudinary.com/dedk0myxj/image/upload/v1589825037/icon/profile-photo-placeholder_j4zy6i.png" alt="user-profile-photo-placeholder" class="comment-user-photo">
+            {{/if}}
+            <span class="hover-cursor-pointer"> {{ this.author.fullname }}</span>
+          </p>
+          </a>
+          <p class="simple-div-header__date">
+            {{ this.createdFormated }}
+          </p>
+          {{#if this.isEditable}}
+          <p>
+            <a class="comment__div-link" onclick="deleteComment('{{ this._id }}')">
+                <span class="hover-cursor-pointer delete-button">&#10007;</span>
+            </a>
+          </p>
+          {{/if}}
+        </div>
+
+        <p class="simple-div-text">{{ this.text }}</p>
+        {{#if this.attached }}
+          <div class="simple-div-media-section">
+            {{#each this.attached }}
+              {{#if this.image }}
+                <img class="simple-div__image-preview" alt="post-photo" src="{{ this.src }}">
+              {{else}}
+                <video>
+                  <source src="{{ this.src }}">
+                </video>
+              {{/if}}
+            {{/each}}
+          </div>
+        {{/if}}
+
+      </div>
+      <!-- REPLY INSTANCE BLOCK END -->
+      {{/each}}
+    {{/if}}
+
+  {{/each}}
+</div>

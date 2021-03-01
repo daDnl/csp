@@ -1,0 +1,60 @@
+<div class="header">
+  <div class="navbar">
+    <a class="header__div-link" href="/">
+      {{#if indexSelected}}
+      <div class="navbar-item navbar-item--selected">
+      {{else}}
+      <div class="navbar-item">
+      {{/if}}
+
+        <img src="/images/icons/home.png" alt="icon" class="navbar-item__icon">
+        <span class="navbar-item__name">Главная</span>
+      </div>
+    </a>
+    <a class="header__div-link" href="/help">
+      {{#if helpSelected}}
+      <div class="navbar-item navbar-item--selected">
+      {{else}}
+      <div class="navbar-item">
+      {{/if}}
+        <img src="/images/icons/help.png" alt="icon" class="navbar-item__icon">
+        <span class="navbar-item__name">Помощь</span>
+      </div>
+    </a>
+    <a class="header__div-link" href="/stats">
+      {{#if statsSelected}}
+      <div class="navbar-item navbar-item--selected">
+      {{else}}
+      <div class="navbar-item">
+      {{/if}}
+        <img src="/images/icons/stats.png" alt="icon" class="navbar-item__icon">
+        <span class="navbar-item__name">Статистика</span>
+      </div>
+    </a>
+    <a class="header__div-link" href="/users/profile">
+      {{#if loginSelected}}
+      <div class="navbar-item navbar-item--selected">
+      {{else}}
+      <div class="navbar-item">
+      {{/if}}
+        <img src="/images/icons/login.png" alt="icon" class="navbar-item__icon">
+        <span class="navbar-item__name">Профиль</span>
+      </div>
+    </a>
+    <a class="header__div-link" href="/auth/logout">
+      <div class="navbar-item">
+        <img src="/images/icons/logout.png" alt="icon" class="navbar-item__icon">
+        <span class="navbar-item__name">Выход</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="header__right">
+    <a class="header__div-link" href="/posts/report">
+      <div class="report-button">
+        <img src="/images/icons/attention.png" alt="icon" class="report-button__icon">
+        <span class="report-button__text">Сообщить о<br>проблеме</span>
+      </div>
+    </a>
+  </div>
+</div>

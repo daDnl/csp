@@ -1,0 +1,21 @@
+<div class="simple-div simple-div_type_fullpage">
+  <div class="simple-div-header sign-up-steps-bar">
+    {{#if register}}
+      <p class="sign-up-step"><span class="round-number">1</span> Создание аккаунта</p>
+      <p class="sign-up-step sign-up-step_type_selected"><span class="round-number round-number_type_selected">2</span> Подтверждение электронной почты</p>
+      <p class="sign-up-step"><span class="round-number">3</span> Завершение регистрации</p>
+    {{else}}
+      <p class="sign-up-step"><span class="round-number">1</span> Поиск аккаунта</p>
+      <p class="sign-up-step sign-up-step_type_selected"><span class="round-number round-number_type_selected">2</span> Переход по ссылке в письме</p>
+      <p class="sign-up-step"><span class="round-number">3</span> Смена пароля</p>
+    {{/if}}
+  </div>
+
+  <div class="simple-div-text">
+    {{#if register}}
+      По адресу <b>{{ email }}</b> было отправлено письмо с подтверждением. Перейдите по ссылке в письме и регистрация будет завершена.
+    {{else}}
+      По адресу <b>{{ email }}</b> было отправлено письмо с подтверждением. Перейдите по ссылке в письме для создания нового пароля от аккаунта.
+    {{/if}}
+  </div>
+</div>
