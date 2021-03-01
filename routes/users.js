@@ -74,15 +74,4 @@ router.put('/profile', upload.any(), user_controller.user_profileEdit_post);
 router.get('/:userId', user_controller.user_profile);
 
 
-/**
- * Адрес, служащий для удаления пользователя по указанному в нем уникальному идентификатору
- * @name delete/profile
- * @function
- * @memberof module:routers/users~usersRouter
- * @inner
- * @param {string} path - Адрес
- * @param {callback} middleware - обрабатывающие middleware функции
- */
-router.delete('/:userId', user_controller.user_delete_post);
-
 module.exports = router;
